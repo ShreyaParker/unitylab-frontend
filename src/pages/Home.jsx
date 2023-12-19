@@ -6,29 +6,33 @@ const Home = () => {
         const [query, setQuery] = useState('');
             const [results, setResults] = useState([]);
 
-            useEffect(() => {
-            const fetchResults = async () => {
+    useEffect(() => {
+        const fetchResults = async () => {
             try {
-            const response = await axios.get(`http://hn.algolia.com/api/v1/search?query=${query}`);
+                const response = await axios.get(`http://hn.algolia.com/api/v1/search?query=${query}`);
                 const filteredResults = response.data.hits.filter(
                     (result) =>
-                        result.title.toLowerCase().includes(query.toLowerCase()) ||
+                        (result.title && result.title.toLowerCase().includes(query.toLowerCase())) ||
                         (result.author && result.author.toLowerCase().includes(query.toLowerCase()))
                 );
                 setResults(filteredResults);
-        } catch (error) {
-            console.error('Error fetching search results:', error);
-        }
+            } catch (error) {
+                console.error('Error fetching search results:', error);
+            }
         };
 
-
+        const delayDebounceFn = setTimeout(() => {
             if (query.trim() !== '') {
-            fetchResults();
-        } else {
+                fetchResults();
+            } else {
+                setResults([]);
+            }
+        }, 300);
 
-            setResults([]);
-        }
-        }, [query]);
+        return () => clearTimeout(delayDebounceFn);
+
+    }, [query]);
+
 
             return (
             <div>
